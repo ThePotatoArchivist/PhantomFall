@@ -63,7 +63,7 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     @Override
     public void serverTick() {
         var phantom = this.phantom;
-        if (owner.getWorld().isClient || phantom == null || !owner.isOnGround()) return;
+        if (owner.getWorld().isClient || phantom == null || (owner.isFallFlying() && PhantomFall.canWearPhantom(owner))) return;
         clearPhantom();
         phantom.setPosition(owner.getPos());
         phantom.setVelocity(Vec3d.ZERO);

@@ -2,9 +2,12 @@ package archives.tater.phantomfall;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
+import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ElytraItem;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,11 @@ public class PhantomFall implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static boolean canWearPhantom(PlayerEntity player) {
+		var chestEquipment = player.getEquippedStack(EquipmentSlot.CHEST).getItem();
+		return !(chestEquipment instanceof ElytraItem) && !(chestEquipment instanceof FabricElytraItem);
+	}
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -28,6 +36,10 @@ public class PhantomFall implements ModInitializer {
 		// Proceed with mild caution.
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
 			if (entity instanceof PhantomEntity phantom && entity.getFirstPassenger() instanceof PlayerEntity player) {
+				if (!canWearPhantom(player)) {
+					player.dismountVehicle();
+					return true;
+				}
 				phantom.setHealth(1);
 				PhantomBodyComponent.KEY.get(player).setPhantomFrom(phantom);
 				phantom.discard();
