@@ -1,0 +1,49 @@
+{
+	"schemaVersion": 1,
+	"id": "phantomfall",
+	"version": "${version}",
+	"name": "PhantomFall",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/phantomfall/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"archives.tater.phantomfall.PhantomFall"
+		],
+		"client": [
+			"archives.tater.phantomfall.PhantomFallClient"
+		],
+		"cardinal-components": [
+			"archives.tater.phantomfall.PhantomFallComponents"
+		]
+	},
+	"mixins": [
+		"phantomfall.mixins.json",
+		{
+			"config": "phantomfall.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"custom": {
+		"cardinal-components": [
+			"phantomfall:phantom_body"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
