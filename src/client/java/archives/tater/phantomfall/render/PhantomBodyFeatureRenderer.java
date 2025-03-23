@@ -1,6 +1,7 @@
 package archives.tater.phantomfall.render;
 
 import archives.tater.phantomfall.PhantomBodyComponent;
+import archives.tater.phantomfall.mixin.client.PhantomEntityModelAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.OverlayTexture;
@@ -33,8 +34,24 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
         matrices.push();
         matrices.translate(0, 7 / 16.0, 3 / 16.0);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
-        model.setAngles(phantom, limbAngle, limbDistance, entity.age + tickDelta, headYaw, headPitch);
+        setAngles(phantom, entity, model, entity.age + tickDelta);
         model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV, 1f, 1f, 1f, 1f);
         matrices.pop();
+    }
+
+    private static void setAngles(PhantomEntity phantom, PlayerEntity player, PhantomEntityModel<PhantomEntity> model, float animationProgress) {
+        var accessor = (PhantomEntityModelAccessor) model;
+
+        var velocityNormY = player.getVelocity().normalize().y;
+        var value = velocityNormY > 0 ? 0f : Math.pow(-velocityNormY, 1.5);
+
+        var pitch = (float) (value * (Math.PI / 18) + value * Math.PI / 12);
+        var yaw = (float) (value * (-Math.PI / 4) + value * Math.PI / 12);
+        accessor.getLeftWingBase().pitch = pitch;
+        accessor.getLeftWingBase().yaw = yaw;
+        accessor.getLeftWingTip().yaw = yaw;
+        accessor.getRightWingBase().pitch = pitch;
+        accessor.getRightWingBase().yaw = -yaw;
+        accessor.getRightWingTip().yaw = -yaw;
     }
 }
