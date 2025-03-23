@@ -1,18 +1,19 @@
 package archives.tater.phantomfall;
 
-import dev.onyxstudios.cca.api.v3.component.Component;
-import dev.onyxstudios.cca.api.v3.component.ComponentKey;
-import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
-import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.ladysnake.cca.api.v3.component.Component;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
+import org.ladysnake.cca.api.v3.component.ComponentRegistry;
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
+import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
 public class PhantomBodyComponent implements Component, AutoSyncedComponent, ServerTickingComponent {
     private final PlayerEntity owner;
@@ -40,7 +41,7 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     }
 
     @Override
-    public void readFromNbt(NbtCompound nbtCompound) {
+    public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
         if (nbtCompound.contains(PHANTOM_KEY, NbtElement.COMPOUND_TYPE)) {
             if (phantom == null)
                 phantom = EntityType.PHANTOM.create(owner.getWorld());
@@ -51,7 +52,7 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     }
 
     @Override
-    public void writeToNbt(NbtCompound nbtCompound) {
+    public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
         if (phantom == null) return;
         var entityTag = new NbtCompound();
         phantom.writeNbt(entityTag);

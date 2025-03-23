@@ -19,7 +19,7 @@ import net.minecraft.util.math.RotationAxis;
 public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, PlayerEntityModel<PlayerEntity>> {
     private final PhantomEntityModel<PhantomEntity> model;
 
-    private static final Identifier TEXTURE = new Identifier("textures/entity/phantom.png");
+    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/entity/phantom.png");
 
     public PhantomBodyFeatureRenderer(FeatureRendererContext<PlayerEntity, PlayerEntityModel<PlayerEntity>> context, EntityModelLoader loader) {
         super(context);
@@ -35,7 +35,7 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
         matrices.translate(0, 7 / 16.0, 3 / 16.0);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
         setAngles(phantom, entity, model, entity.age + tickDelta);
-        model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV, 1f, 1f, 1f, 1f);
+        model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV);
         matrices.pop();
     }
 
