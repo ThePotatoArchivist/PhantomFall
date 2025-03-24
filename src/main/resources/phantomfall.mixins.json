@@ -5,6 +5,7 @@
   "mixins": [
     "FireworkRocketItemMixin",
     "PhantomEntityMixin",
+    "PlayerEntityMixin",
     "ProjectileUtilMixin"
   ],
   "injectors": {
