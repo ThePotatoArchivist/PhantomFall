@@ -2,6 +2,7 @@ package archives.tater.phantomfall;
 
 import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
@@ -17,5 +18,8 @@ public class PhantomFallClient implements ClientModInitializer {
 			if (entityType == EntityType.PLAYER)
                 registrationHelper.register(new PhantomBodyFeatureRenderer((FeatureRendererContext<PlayerEntity, PlayerEntityModel<PlayerEntity>>) entityRenderer, context.getModelLoader()));
 		});
+		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
+				PhantomBodyComponent.KEY.get(player).getPhantom() == null);
+
 	}
 }

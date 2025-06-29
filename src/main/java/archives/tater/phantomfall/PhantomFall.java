@@ -50,6 +50,5 @@ public class PhantomFall implements ModInitializer {
 		});
 		EntityElytraEvents.CUSTOM.register((entity, tickElytra) ->
 				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
-		// TODO prevent dismount
 	}
 }
