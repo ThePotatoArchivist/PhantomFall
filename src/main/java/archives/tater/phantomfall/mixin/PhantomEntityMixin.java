@@ -1,10 +1,12 @@
 package archives.tater.phantomfall.mixin;
 
+import archives.tater.phantomfall.PhantomBodyComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.FlyingEntity;
 import net.minecraft.entity.mob.PhantomEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -17,9 +19,8 @@ public abstract class PhantomEntityMixin extends FlyingEntity {
 	@Override
 	public boolean tryAttack(Entity target) {
 		if (super.tryAttack(target)) {
-			if (target instanceof LivingEntity livingEntity) {
+			if (target instanceof LivingEntity livingEntity && !(livingEntity.getVehicle() instanceof PhantomEntity) && !(livingEntity instanceof PlayerEntity && PhantomBodyComponent.KEY.get(livingEntity).getPhantom() != null))
 				livingEntity.startRiding((PhantomEntity) (Object) this, true);
-			}
 			return true;
 		} else {
 			return false;
