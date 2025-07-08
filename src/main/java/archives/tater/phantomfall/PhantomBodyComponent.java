@@ -71,4 +71,6 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
         owner.getWorld().spawnEntity(phantom);
         phantom.damage(owner.getDamageSources().playerAttack(owner), Float.MAX_VALUE);
     }
+
+
 }

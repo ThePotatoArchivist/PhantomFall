@@ -2,14 +2,40 @@ package archives.tater.phantomfall;
 
 import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class PhantomFallClient implements ClientModInitializer {
+	private static boolean perspectiveChanged = false;
+	private static @Nullable Perspective savedPerspective = null;
+
+	public static void savePerspective() {
+		var options = MinecraftClient.getInstance().options;
+		savedPerspective = options.getPerspective();
+		options.setPerspective(Perspective.THIRD_PERSON_BACK);
+	}
+
+	public static void restorePerspective() {
+		if (savedPerspective == null) return;
+		var options = MinecraftClient.getInstance().options;
+		if (options.getPerspective() == Perspective.THIRD_PERSON_BACK)
+			options.setPerspective(savedPerspective);
+		savedPerspective = null;
+	}
+
+	public static void clearPerspective() {
+		savedPerspective = null;
+	}
+
 	@SuppressWarnings("unchecked")
     @Override
 	public void onInitializeClient() {
@@ -20,6 +46,24 @@ public class PhantomFallClient implements ClientModInitializer {
 		});
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
 				PhantomBodyComponent.KEY.get(player).getPhantom() == null);
-
+		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+			var clientPlayer = MinecraftClient.getInstance().player;
+			if (clientPlayer == null) return;
+			if (PhantomBodyComponent.KEY.get(clientPlayer).getPhantom() != null) {
+				if (!perspectiveChanged) {
+					savePerspective();
+					perspectiveChanged = true;
+				}
+			} else {
+				if (perspectiveChanged) {
+					restorePerspective();
+					perspectiveChanged = false;
+				}
+			}
+		});
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			clearPerspective();
+			perspectiveChanged = false;
+		});
 	}
 }
