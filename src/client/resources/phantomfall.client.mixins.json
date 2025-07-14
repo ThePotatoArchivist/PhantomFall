@@ -4,10 +4,11 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ClientPlayNetworkHandlerMixin",
+    "LivingEntityRendererMixin",
     "MinecraftClientMixin",
     "PhantomEntityModelAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  }
 }

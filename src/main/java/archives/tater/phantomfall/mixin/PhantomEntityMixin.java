@@ -1,14 +1,13 @@
 package archives.tater.phantomfall.mixin;
 
-import archives.tater.phantomfall.PhantomBodyComponent;
-import net.minecraft.entity.Entity;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.FlyingEntity;
 import net.minecraft.entity.mob.PhantomEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(PhantomEntity.class)
 public abstract class PhantomEntityMixin extends FlyingEntity {
@@ -16,22 +15,19 @@ public abstract class PhantomEntityMixin extends FlyingEntity {
 		super(entityType, world);
 	}
 
-	@Override
-	public boolean tryAttack(Entity target) {
-		if (super.tryAttack(target)) {
-			if (target instanceof LivingEntity livingEntity && !(livingEntity.getVehicle() instanceof PhantomEntity) && !(livingEntity instanceof PlayerEntity && PhantomBodyComponent.KEY.get(livingEntity).getPhantom() != null))
-				livingEntity.startRiding((PhantomEntity) (Object) this, true);
-			return true;
-		} else {
-			return false;
-		}
+	@ModifyArg(
+			method = "initialize",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/PhantomEntity;setPhantomSize(I)V")
+	)
+	private int defaultSize(int size) {
+		return size == 0 ? 1 : size;
 	}
 
-	@Override
-	protected void updatePassengerPosition(Entity passenger, PositionUpdater positionUpdater) {
-		if (this.hasPassenger(passenger)) {
-			double y = this.getY() - passenger.getHeight();
-			positionUpdater.accept(passenger, this.getX(), y, this.getZ());
-		}
+	@ModifyExpressionValue(
+			method = "onSizeChanged",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/PhantomEntity;getPhantomSize()I")
+	)
+	private int preventDamageIncrease(int original) {
+		return 0;
 	}
 }

@@ -42,13 +42,15 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
 
     @Override
     public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        if (nbtCompound.contains(PHANTOM_KEY, NbtElement.COMPOUND_TYPE)) {
-            if (phantom == null)
-                phantom = EntityType.PHANTOM.create(owner.getWorld());
-            if (phantom != null) // Yes this is goofy
-                phantom.readNbt(nbtCompound);
-        } else if (phantom != null)
+        if (!nbtCompound.contains(PHANTOM_KEY, NbtElement.COMPOUND_TYPE)) {
             phantom = null;
+            return;
+        }
+
+        if (phantom == null)
+            phantom = EntityType.PHANTOM.create(owner.getWorld());
+        if (phantom != null) // Yes this is goofy
+            phantom.readNbt(nbtCompound.getCompound(PHANTOM_KEY));
     }
 
     @Override
@@ -71,6 +73,4 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
         owner.getWorld().spawnEntity(phantom);
         phantom.damage(owner.getDamageSources().playerAttack(owner), Float.MAX_VALUE);
     }
-
-
 }

@@ -25,32 +25,44 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
         super(context);
         model = new PhantomEntityModel<>(loader.getModelPart(EntityModelLayers.PHANTOM));
         model.getChild(EntityModelPartNames.HEAD).ifPresent(modelPart -> modelPart.visible = false);
+        model.getChild(EntityModelPartNames.BODY).ifPresent(modelPart -> modelPart.pitch = 0);
     }
 
     @Override
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, PlayerEntity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         var phantom = PhantomBodyComponent.KEY.get(entity).getPhantom();
         if (phantom == null) return;
-        matrices.push();
-        matrices.translate(0, 7 / 16.0, 3 / 16.0);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
-        setAngles(phantom, entity, model, entity.age + tickDelta);
-        model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV);
-        matrices.pop();
-    }
 
-    private static void setAngles(PhantomEntity phantom, PlayerEntity player, PhantomEntityModel<PhantomEntity> model, float animationProgress) {
-        var accessor = (PhantomEntityModelAccessor) model;
-
-        var velocityNormY = player.getVelocity().normalize().y;
+        var velocityNormY = entity.getVelocity().normalize().y;
         var value = velocityNormY > 0 ? 0f : Math.pow(-velocityNormY, 1.5);
 
         var pitch = (float) (value * (Math.PI / 18) + value * Math.PI / 12);
         var yaw = (float) (value * (-Math.PI / 4) + value * Math.PI / 12);
-        accessor.getLeftWingBase().pitch = pitch;
+
+        matrices.push();
+        matrices.translate(0, 0, 2 / 16.0); // Pivot point
+
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
+
+        matrices.translate(0, 0, -1 / 16.0); // Scaling center
+
+        var scale = 1f + 0.15f * phantom.getPhantomSize();
+        matrices.scale(scale, scale, scale);
+
+        matrices.translate(0, -1 / 16.0, 8 / 16.0); // Model center
+
+        setAngles(model, pitch, yaw);
+        model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV);
+
+        matrices.pop();
+    }
+
+    private static void setAngles(PhantomEntityModel<PhantomEntity> model, float pitch, float yaw) {
+        var accessor = (PhantomEntityModelAccessor) model;
+
         accessor.getLeftWingBase().yaw = yaw;
         accessor.getLeftWingTip().yaw = yaw;
-        accessor.getRightWingBase().pitch = pitch;
         accessor.getRightWingBase().yaw = -yaw;
         accessor.getRightWingTip().yaw = -yaw;
     }
