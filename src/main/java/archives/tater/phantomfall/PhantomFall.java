@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class PhantomFall implements ModInitializer {
@@ -40,9 +40,17 @@ public class PhantomFall implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static final PhantomFallConfig CONFIG = PhantomFallConfig.createToml(
+			FabricLoader.getInstance().getConfigDir(),
+			MOD_ID,
+			MOD_ID,
+			PhantomFallConfig.class
+	);
+
 	public static final TagKey<DamageType> PHANTOM_PICKUP = TagKey.of(RegistryKeys.DAMAGE_TYPE, id("phantom_pickup"));
 
 	public static boolean canWearPhantom(PlayerEntity player) {
+		if (player.isFallFlying()) return false;
 		var chestEquipment = player.getEquippedStack(EquipmentSlot.CHEST).getItem();
 		return !(chestEquipment instanceof ElytraItem) && !(chestEquipment instanceof FabricElytraItem);
 	}
@@ -51,8 +59,8 @@ public class PhantomFall implements ModInitializer {
 		var sizes = new ArrayList<Integer>();
 		var remaining = value;
 		while (remaining > 0) {
-			var size = max(min(random.nextBetween(2, 5), remaining), 2);
-			sizes.add(size - 1); // Phantom size starts at 0
+			var size = min(random.nextBetween(1, CONFIG.server.maxPhantomSize), remaining);
+			sizes.add(size); // Phantom size starts at 0
 			remaining -= size;
 		}
 		return sizes;
@@ -103,11 +111,11 @@ public class PhantomFall implements ModInitializer {
 			var spawnedPhantoms = phantomsSpawned.getAmount();
 			var random = world.getRandom();
 
-			if (random.nextFloat() > 0.5f + 0.05f * spawnedPhantoms) return;
+			if (random.nextFloat() > CONFIG.server.baseSpawnChance + CONFIG.server.spawnChanceIncrease * spawnedPhantoms) return;
 
 			player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
 
-			for (var size : distributeSizes(min(spawnedPhantoms + 1, 16), random)) {
+			for (var size : distributeSizes(min(spawnedPhantoms + 1, CONFIG.server.maxSpawnScore), random)) {
 				var blockPos = entity.getBlockPos().up(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21));
 				if (!SpawnHelper.isClearForSpawn(world, blockPos, world.getBlockState(blockPos), world.getFluidState(blockPos), EntityType.PHANTOM)) continue;
 				var phantom = EntityType.PHANTOM.create(world);
