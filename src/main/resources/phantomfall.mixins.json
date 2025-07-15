@@ -6,6 +6,7 @@
     "EntityMixin",
     "FireworkRocketItemMixin",
     "GameRulesMixin",
+    "MobEntityMixin",
     "PhantomEntityMixin",
     "PlayerEntityMixin",
     "ProjectileUtilMixin"
