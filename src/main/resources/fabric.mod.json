@@ -34,7 +34,8 @@
 	],
 	"custom": {
 		"cardinal-components": [
-			"phantomfall:phantom_body"
+			"phantomfall:phantom_body",
+			"phantomfall:phantoms_spawned"
 		]
 	},
 	"depends": {

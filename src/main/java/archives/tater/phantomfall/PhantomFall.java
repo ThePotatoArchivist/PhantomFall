@@ -27,7 +27,6 @@ import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static net.minecraft.util.math.MathHelper.clamp;
 
 public class PhantomFall implements ModInitializer {
 	public static final String MOD_ID = "phantomfall";
@@ -93,22 +92,22 @@ public class PhantomFall implements ModInitializer {
 			var world = entity.getWorld();
 			if (!(world instanceof ServerWorld serverWorld)) return;
 			if (!(entity instanceof PlayerEntity player)) return;
-			var phantomBodyComponent = PhantomBodyComponent.KEY.get(player);
-			world.calculateAmbientDarkness();
+			var phantomsSpawned = PhantomsSpawnedComponent.KEY.get(player);
+			world.calculateAmbientDarkness(); // day/night is based on ambient light which normally only updates every tick
 			if (!world.isNight()) {
-				phantomBodyComponent.resetSpawnedPhantoms();
+				phantomsSpawned.resetAmount();
 				return;
 			}
 			if (!world.isSkyVisible(entity.getBlockPos())) return;
 
-			var spawnedPhantoms = phantomBodyComponent.getSpawnedPhantoms();
+			var spawnedPhantoms = phantomsSpawned.getAmount();
 			var random = world.getRandom();
 
 			if (random.nextFloat() > 0.5f + 0.05f * spawnedPhantoms) return;
 
 			player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
 
-			for (var size : distributeSizes(clamp(spawnedPhantoms, 1, 16), random)) {
+			for (var size : distributeSizes(min(spawnedPhantoms + 1, 16), random)) {
 				var blockPos = entity.getBlockPos().up(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21));
 				if (!SpawnHelper.isClearForSpawn(world, blockPos, world.getBlockState(blockPos), world.getFluidState(blockPos), EntityType.PHANTOM)) continue;
 				var phantom = EntityType.PHANTOM.create(world);
@@ -116,8 +115,9 @@ public class PhantomFall implements ModInitializer {
 				phantom.refreshPositionAndAngles(blockPos, 0.0F, 0.0F);
 				phantom.initialize(serverWorld, world.getLocalDifficulty(entity.getBlockPos()), SpawnReason.NATURAL, null);
 				phantom.setPhantomSize(size);
+				phantom.setHealth(phantom.getMaxHealth());
 				serverWorld.spawnEntityAndPassengers(phantom);
-				phantomBodyComponent.increaseSpawnedPhantoms();
+				phantomsSpawned.increaseAmount();
 			}
 		});
 	}

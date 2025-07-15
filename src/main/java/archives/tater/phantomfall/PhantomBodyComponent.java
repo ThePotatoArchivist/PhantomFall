@@ -18,10 +18,8 @@ import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 public class PhantomBodyComponent implements Component, AutoSyncedComponent, ServerTickingComponent {
     private final PlayerEntity owner;
     private @Nullable PhantomEntity phantom;
-    private int spawnedPhantoms = 0;
 
     public static final String PHANTOM_KEY = "Phantom";
-    public static final String SPAWNED_PHANTOMS_KEY = "spawned_phantoms";
 
     public PhantomBodyComponent(PlayerEntity owner) {
         this.owner = owner;
@@ -42,22 +40,8 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
         KEY.sync(owner);
     }
 
-    public int getSpawnedPhantoms() {
-        return spawnedPhantoms;
-    }
-
-    public void increaseSpawnedPhantoms() {
-        spawnedPhantoms++;
-    }
-
-    public void resetSpawnedPhantoms() {
-        spawnedPhantoms = 0;
-    }
-
     @Override
     public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        spawnedPhantoms = nbtCompound.getInt(SPAWNED_PHANTOMS_KEY);
-
         if (!nbtCompound.contains(PHANTOM_KEY, NbtElement.COMPOUND_TYPE)) {
             phantom = null;
             return;
@@ -71,8 +55,6 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
 
     @Override
     public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbtCompound.putInt(SPAWNED_PHANTOMS_KEY, spawnedPhantoms);
-
         if (phantom == null) return;
         var entityTag = new NbtCompound();
         phantom.writeNbt(entityTag);
