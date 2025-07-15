@@ -32,6 +32,14 @@ repositories {
 		}
 	}
 	maven { url 'https://repo.sleeping.town/' }
+
+	maven { url "https://maven.shedaniel.me/" }
+	maven {
+		name "KosmX's maven"
+		url 'https://maven.kosmx.dev/'
+	}
+//	maven { url 'https://maven.wispforest.io/releases' }
+//	maven { url 'https://maven.su5ed.dev/releases' }
 }
 
 loom {
@@ -59,7 +67,9 @@ dependencies {
 	modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
 	implementation include("folk.sisby:kaleido-config:${project.kaleido_version}")
-	modImplementation "maven.modrinth:mcqoy:${project.mcqoy_version}"
+	modLocalRuntime "maven.modrinth:mcqoy:${project.mcqoy_version}"
+
+	modCompileOnly "maven.modrinth:better-combat:${project.better_combat_version}-fabric"
 }
 
 processResources {

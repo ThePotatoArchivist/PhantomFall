@@ -9,9 +9,11 @@
     "MobEntityMixin",
     "PhantomEntityMixin",
     "PlayerEntityMixin",
-    "ProjectileUtilMixin"
+    "ProjectileUtilMixin",
+    "bettercombat.TargetHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  },
+  "plugin": "archives.tater.phantomfall.PhantomFallMixinConfigPlugin"
 }
