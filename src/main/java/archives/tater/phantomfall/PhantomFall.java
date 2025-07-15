@@ -50,7 +50,6 @@ public class PhantomFall implements ModInitializer {
 	public static final TagKey<DamageType> PHANTOM_PICKUP = TagKey.of(RegistryKeys.DAMAGE_TYPE, id("phantom_pickup"));
 
 	public static boolean canWearPhantom(PlayerEntity player) {
-		if (player.isFallFlying()) return false;
 		var chestEquipment = player.getEquippedStack(EquipmentSlot.CHEST).getItem();
 		return !(chestEquipment instanceof ElytraItem) && !(chestEquipment instanceof FabricElytraItem);
 	}
@@ -72,6 +71,7 @@ public class PhantomFall implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
+			if (entity.isFallFlying()) return;
             if (!source.isIn(PHANTOM_PICKUP)) return;
 			var attacker = source.getAttacker();
 			if (!(attacker instanceof PhantomEntity)) return;
@@ -81,7 +81,7 @@ public class PhantomFall implements ModInitializer {
         });
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
 			if (entity instanceof PhantomEntity phantom && entity.getFirstPassenger() instanceof PlayerEntity player) {
-				if (!canWearPhantom(player)) {
+				if (!canWearPhantom(player) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(entity, false)) {
 					player.dismountVehicle();
 					return true;
 				}
