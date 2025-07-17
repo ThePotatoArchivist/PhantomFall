@@ -2,16 +2,16 @@
 	"schemaVersion": 1,
 	"id": "phantomfall",
 	"version": "${version}",
-	"name": "PhantomFall",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Phantasmic Flight",
+	"description": "Rework phantoms as an early game flight method",
 	"authors": [
-		"Me!"
+		"ThePotatoArchivist"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://modrinth.com/mod/phantasmic-flight",
+		"sources": "https://github.com/ThePotatoArchivist/PhantomFall"
 	},
-	"license": "CC0-1.0",
+	"license": "LGPL-3.0-or-later",
 	"icon": "assets/phantomfall/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -42,9 +42,10 @@
 		"fabricloader": ">=0.16.10",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"cardinal-components-entity": "~6.1.2"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"mcqoy": "*"
 	}
 }
