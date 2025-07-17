@@ -50,7 +50,7 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
         var scale = 1f + 0.15f * phantom.getPhantomSize();
         matrices.scale(scale, scale, scale);
 
-        matrices.translate(0, -1 / 16.0, 8 / 16.0); // Model center
+        matrices.translate(1 / 32.0, -1 / 16.0, 8 / 16.0); // Model center
 
         setAngles(model, pitch, yaw);
         model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV);
