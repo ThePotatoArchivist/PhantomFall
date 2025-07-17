@@ -25,6 +25,6 @@ public class PhantomFallConfig extends WrappedConfig {
         @Comment("How much the spawn chance should increase per previous spawn")
         public float spawnChanceIncrease = 0.05f;
         @Comment("The cap for the \"spawning score\" used to spawn a group of phantoms")
-        public int maxSpawnScore = 16;
+        public int maxSpawnScore = 8;
     }
 }

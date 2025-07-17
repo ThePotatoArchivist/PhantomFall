@@ -115,6 +115,8 @@ public class PhantomFall implements ModInitializer {
 
 			player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
 
+			var success = false;
+
 			for (var size : distributeSizes(min(spawnedPhantoms + 1, CONFIG.server.maxSpawnScore), random)) {
 				var blockPos = entity.getBlockPos().up(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21));
 				if (!SpawnHelper.isClearForSpawn(world, blockPos, world.getBlockState(blockPos), world.getFluidState(blockPos), EntityType.PHANTOM)) continue;
@@ -125,8 +127,11 @@ public class PhantomFall implements ModInitializer {
 				phantom.setPhantomSize(size);
 				phantom.setHealth(phantom.getMaxHealth());
 				serverWorld.spawnEntityAndPassengers(phantom);
-				phantomsSpawned.increaseAmount();
+				success = true;
 			}
+
+			if (success)
+				phantomsSpawned.increaseAmount();
 		});
 	}
 }
