@@ -80,19 +80,19 @@ public class PhantomFall implements ModInitializer {
             entity.startRiding(attacker);
         });
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
-			if (entity instanceof PhantomEntity phantom && entity.getFirstPassenger() instanceof PlayerEntity player) {
-				if (!canWearPhantom(player) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(entity, false)) {
-					player.dismountVehicle();
-					return true;
-				}
-				phantom.setHealth(1);
-				PhantomBodyComponent.KEY.get(player).setPhantomFrom(phantom);
-				phantom.discard();
-				player.startFallFlying();
-				return false;
-			}
-			return true;
-		});
+            if (!(entity instanceof PhantomEntity phantom) || !(entity.getFirstPassenger() instanceof PlayerEntity player)) return true;
+
+			player.dismountVehicle();
+
+            if (damageSource.getAttacker() != player || !canWearPhantom(player) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(entity, false)) return true;
+
+            phantom.setHealth(1);
+            PhantomBodyComponent.KEY.get(player).setPhantomFrom(phantom);
+            phantom.discard();
+            player.startFallFlying();
+
+            return false;
+        });
 		EntityElytraEvents.CUSTOM.register((entity, tickElytra) ->
 				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
 
