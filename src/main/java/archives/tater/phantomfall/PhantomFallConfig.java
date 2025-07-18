@@ -28,5 +28,8 @@ public class PhantomFallConfig extends WrappedConfig {
         @Comment("The cap for the \"spawning score\" used to spawn a group of phantoms")
         @IntegerRange(min = 1, max = 64)
         public int maxSpawnScore = 8;
+        @Comment("The cooldown for spawning phantoms in seconds")
+        @IntegerRange(min = 0, max = 600)
+        public int spawnCooldown = 60;
     }
 }

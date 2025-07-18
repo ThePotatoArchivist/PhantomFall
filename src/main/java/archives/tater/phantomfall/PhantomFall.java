@@ -101,6 +101,7 @@ public class PhantomFall implements ModInitializer {
 			if (!(world instanceof ServerWorld serverWorld)) return;
 			if (!(entity instanceof PlayerEntity player)) return;
 			var phantomsSpawned = PhantomsSpawnedComponent.KEY.get(player);
+			if (!phantomsSpawned.canSpawnPhantoms()) return;
 			world.calculateAmbientDarkness(); // day/night is based on ambient light which normally only updates every tick
 			if (!world.isNight()) {
 				phantomsSpawned.resetAmount();
@@ -112,8 +113,6 @@ public class PhantomFall implements ModInitializer {
 			var random = world.getRandom();
 
 			if (random.nextFloat() > CONFIG.server.baseSpawnChance + CONFIG.server.spawnChanceIncrease * spawnedPhantoms) return;
-
-			player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
 
 			var success = false;
 
@@ -130,8 +129,11 @@ public class PhantomFall implements ModInitializer {
 				success = true;
 			}
 
-			if (success)
+			if (success) {
+				player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
 				phantomsSpawned.increaseAmount();
+				phantomsSpawned.setCooldown();
+			}
 		});
 	}
 }

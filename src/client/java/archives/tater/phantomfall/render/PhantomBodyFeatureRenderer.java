@@ -4,6 +4,7 @@ import archives.tater.phantomfall.PhantomBodyComponent;
 import archives.tater.phantomfall.mixin.client.PhantomEntityModelAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -38,6 +39,11 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
 
         var pitch = (float) (value * (Math.PI / 18) + value * Math.PI / 12);
         var yaw = (float) (value * (-Math.PI / 4) + value * Math.PI / 12);
+
+        if (entity instanceof AbstractClientPlayerEntity clientPlayer) {
+            pitch = clientPlayer.elytraPitch = clientPlayer.elytraPitch + (pitch - clientPlayer.elytraPitch) * 0.1F;
+            yaw = clientPlayer.elytraYaw = clientPlayer.elytraYaw + (yaw - clientPlayer.elytraYaw) * 0.1F;
+        }
 
         matrices.push();
         matrices.translate(0, 0, 2 / 16.0); // Pivot point
