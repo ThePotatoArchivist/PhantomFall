@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class FireworkRocketItemMixin {
     @WrapOperation(
             method = "use",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isFallFlying()Z")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isGliding()Z")
     )
     private boolean checkPhantom(PlayerEntity instance, Operation<Boolean> original) {
         return original.call(instance) && PhantomBodyComponent.KEY.get(instance).getPhantom() == null;

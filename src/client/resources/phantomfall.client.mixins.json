@@ -6,7 +6,11 @@
     "ClientPlayNetworkHandlerMixin",
     "LivingEntityRendererMixin",
     "MinecraftClientMixin",
-    "PhantomEntityModelAccessor"
+    "ModelPartDataAccessor",
+    "PhantomEntityModelAccessor",
+    "PlayerEntityRendererMixin",
+    "PlayerEntityRenderStateMixin",
+    "TextureModelDataAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

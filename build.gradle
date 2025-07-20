@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -67,9 +67,8 @@ dependencies {
 	modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
 	implementation include("folk.sisby:kaleido-config:${project.kaleido_version}")
-	modLocalRuntime "maven.modrinth:mcqoy:${project.mcqoy_version}"
 
-	modCompileOnly "maven.modrinth:better-combat:${project.better_combat_version}-fabric"
+//	modCompileOnly "maven.modrinth:better-combat:${project.better_combat_version}-fabric"
 }
 
 processResources {

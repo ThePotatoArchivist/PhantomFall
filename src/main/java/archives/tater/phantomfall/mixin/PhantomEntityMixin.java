@@ -3,7 +3,7 @@ package archives.tater.phantomfall.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.FlyingEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,12 +16,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static java.lang.Math.max;
 
 @Mixin(PhantomEntity.class)
-public abstract class PhantomEntityMixin extends FlyingEntity {
-	@Shadow public abstract int getPhantomSize();
-
-	protected PhantomEntityMixin(EntityType<? extends FlyingEntity> entityType, World world) {
+public abstract class PhantomEntityMixin extends MobEntity {
+	protected PhantomEntityMixin(EntityType<? extends MobEntity> entityType, World world) {
 		super(entityType, world);
 	}
+
+	@Shadow public abstract int getPhantomSize();
 
 	@ModifyArg(
 			method = "initialize",
@@ -45,6 +45,6 @@ public abstract class PhantomEntityMixin extends FlyingEntity {
 			at = @At("TAIL")
 	)
 	private void increaseHealth(CallbackInfo ci) {
-		getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(16 + 4 * getPhantomSize());
+		getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(16 + 4 * getPhantomSize());
 	}
 }

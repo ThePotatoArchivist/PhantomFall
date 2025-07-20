@@ -9,8 +9,7 @@
     "MobEntityMixin",
     "PhantomEntityMixin",
     "PlayerEntityMixin",
-    "ProjectileUtilMixin",
-    "bettercombat.TargetHelperMixin"
+    "ProjectileUtilMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -4,20 +4,24 @@ import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class PhantomFallClient implements ClientModInitializer {
 
 	private static boolean perspectiveChanged = false;
 	private static @Nullable Perspective savedPerspective = null;
+
+	public static EntityModelLayer PHANTOM_BODY = new EntityModelLayer(PhantomFall.id("phantom_body"), "main");
 
 	public static void savePerspective() {
 		var options = MinecraftClient.getInstance().options;
@@ -41,9 +45,11 @@ public class PhantomFallClient implements ClientModInitializer {
     @Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY, PhantomBodyFeatureRenderer::getTexturedModelData);
+
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
 			if (entityType == EntityType.PLAYER)
-                registrationHelper.register(new PhantomBodyFeatureRenderer((FeatureRendererContext<PlayerEntity, PlayerEntityModel<PlayerEntity>>) entityRenderer, context.getModelLoader()));
+                registrationHelper.register(new PhantomBodyFeatureRenderer((FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel>) entityRenderer, context.getEntityModels()));
 		});
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
 				PhantomBodyComponent.KEY.get(player).getPhantom() == null);

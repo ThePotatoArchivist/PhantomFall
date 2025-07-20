@@ -1,11 +1,12 @@
 package archives.tater.phantomfall;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,24 +42,22 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     }
 
     @Override
-    public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        if (!nbtCompound.contains(PHANTOM_KEY, NbtElement.COMPOUND_TYPE)) {
+    public void readData(ReadView readView) {
+        var phantomData = readView.getOptionalReadView(PHANTOM_KEY);
+        if (phantomData.isEmpty()) {
             phantom = null;
             return;
         }
-
         if (phantom == null)
-            phantom = EntityType.PHANTOM.create(owner.getWorld());
-        if (phantom != null) // Yes this is goofy
-            phantom.readNbt(nbtCompound.getCompound(PHANTOM_KEY));
+            phantom = EntityType.PHANTOM.create(owner.getWorld(), SpawnReason.NATURAL);
+        if (phantom != null)
+            phantom.readData(phantomData.get());
     }
 
     @Override
-    public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public void writeData(WriteView writeView) {
         if (phantom == null) return;
-        var entityTag = new NbtCompound();
-        phantom.writeNbt(entityTag);
-        nbtCompound.put(PHANTOM_KEY, entityTag);
+        phantom.writeData(writeView.get(PHANTOM_KEY));
     }
 
     public static final ComponentKey<PhantomBodyComponent> KEY = ComponentRegistry.getOrCreate(PhantomFall.id("phantom_body"), PhantomBodyComponent.class);
@@ -66,11 +65,11 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     @Override
     public void serverTick() {
         var phantom = this.phantom;
-        if (owner.getWorld().isClient || phantom == null || (owner.isAlive() && owner.isFallFlying() && PhantomFall.canWearPhantom(owner))) return;
+        if (!(owner.getWorld() instanceof ServerWorld world) || phantom == null || (owner.isAlive() && owner.isGliding() && PhantomFall.canWearPhantom(owner))) return;
         clearPhantom();
         phantom.setPosition(owner.getPos());
         phantom.setVelocity(Vec3d.ZERO);
         owner.getWorld().spawnEntity(phantom);
-        phantom.damage(owner.getDamageSources().playerAttack(owner), Float.MAX_VALUE);
+        phantom.damage(world, owner.getDamageSources().playerAttack(owner), Float.MAX_VALUE);
     }
 }

@@ -23,7 +23,7 @@ public class ClientPlayNetworkHandlerMixin {
 
     @WrapWithCondition(
             method = "onEntityPassengersSet",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/NarratorManager;narrate(Lnet/minecraft/text/Text;)V")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/NarratorManager;narrateSystemImmediately(Lnet/minecraft/text/Text;)V")
     )
     private boolean checkPhantom(NarratorManager instance, Text text, @Local(ordinal = 0) Entity entity) {
         return !(entity instanceof PhantomEntity);

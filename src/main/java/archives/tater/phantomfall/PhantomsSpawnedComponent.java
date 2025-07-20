@@ -1,7 +1,7 @@
 package archives.tater.phantomfall;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import org.ladysnake.cca.api.v3.component.Component;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
@@ -41,15 +41,15 @@ public class PhantomsSpawnedComponent implements Component, ServerTickingCompone
     }
 
     @Override
-    public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        amount = nbtCompound.getInt(AMOUNT_KEY);
-        cooldown = nbtCompound.getInt(COOLDOWN_KEY);
+    public void readData(ReadView readView) {
+        amount = readView.getInt(AMOUNT_KEY, 0);
+        cooldown = readView.getInt(COOLDOWN_KEY, 0);
     }
 
     @Override
-    public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbtCompound.putInt(AMOUNT_KEY, amount);
-        nbtCompound.putInt(COOLDOWN_KEY, cooldown);
+    public void writeData(WriteView writeView) {
+        writeView.putInt(AMOUNT_KEY, amount);
+        writeView.putInt(COOLDOWN_KEY, cooldown);
     }
 
     public static final ComponentKey<PhantomsSpawnedComponent> KEY = ComponentRegistry.getOrCreate(PhantomFall.id("phantoms_spawned"), PhantomsSpawnedComponent.class);

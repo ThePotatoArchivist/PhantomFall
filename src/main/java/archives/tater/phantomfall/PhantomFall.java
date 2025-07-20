@@ -3,7 +3,6 @@ package archives.tater.phantomfall;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
-import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityType;
@@ -12,7 +11,6 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
@@ -27,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.min;
+import static net.minecraft.entity.LivingEntity.canGlideWith;
 
 public class PhantomFall implements ModInitializer {
 	public static final String MOD_ID = "phantomfall";
@@ -50,8 +49,10 @@ public class PhantomFall implements ModInitializer {
 	public static final TagKey<DamageType> PHANTOM_PICKUP = TagKey.of(RegistryKeys.DAMAGE_TYPE, id("phantom_pickup"));
 
 	public static boolean canWearPhantom(PlayerEntity player) {
-		var chestEquipment = player.getEquippedStack(EquipmentSlot.CHEST).getItem();
-		return !(chestEquipment instanceof ElytraItem) && !(chestEquipment instanceof FabricElytraItem);
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES)
+            if (canGlideWith(player.getEquippedStack(equipmentSlot), equipmentSlot))
+				return false;
+		return true;
 	}
 
 	public static List<Integer> distributeSizes(int value, Random random) {
@@ -71,7 +72,7 @@ public class PhantomFall implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
-			if (entity.isFallFlying()) return;
+			if (entity.isGliding()) return;
             if (!source.isIn(PHANTOM_PICKUP)) return;
 			var attacker = source.getAttacker();
 			if (!(attacker instanceof PhantomEntity)) return;
@@ -89,7 +90,7 @@ public class PhantomFall implements ModInitializer {
             phantom.setHealth(1);
             PhantomBodyComponent.KEY.get(player).setPhantomFrom(phantom);
             phantom.discard();
-            player.startFallFlying();
+            player.startGliding();
 
             return false;
         });
@@ -119,7 +120,7 @@ public class PhantomFall implements ModInitializer {
 			for (var size : distributeSizes(min(spawnedPhantoms + 1, CONFIG.server.maxSpawnScore), random)) {
 				var blockPos = entity.getBlockPos().up(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21));
 				if (!SpawnHelper.isClearForSpawn(world, blockPos, world.getBlockState(blockPos), world.getFluidState(blockPos), EntityType.PHANTOM)) continue;
-				var phantom = EntityType.PHANTOM.create(world);
+				var phantom = EntityType.PHANTOM.create(world, SpawnReason.NATURAL);
 				if (phantom == null) continue;
 				phantom.refreshPositionAndAngles(blockPos, 0.0F, 0.0F);
 				phantom.initialize(serverWorld, world.getLocalDifficulty(entity.getBlockPos()), SpawnReason.NATURAL, null);
