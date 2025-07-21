@@ -72,6 +72,7 @@ public class PhantomFall implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
+			if (blocked) return;
 			if (entity.isGliding()) return;
             if (!source.isIn(PHANTOM_PICKUP)) return;
 			var attacker = source.getAttacker();
