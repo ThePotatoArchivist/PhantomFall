@@ -94,7 +94,7 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
     public static TexturedModelData getTexturedModelData() {
         var data = PhantomEntityModel.getTexturedModelData();
-        ((ModelPartDataAccessor) ((TextureModelDataAccessor) data).getData().getRoot().getChild(EntityModelPartNames.BODY)).getChildren().remove(EntityModelPartNames.HEAD);
+        ((ModelPartDataAccessor) ((TextureModelDataAccessor) data).getData().getRoot().getChild(EntityModelPartNames.BODY)).phantomfall$getChildren().remove(EntityModelPartNames.HEAD);
         return data;
     }
 }

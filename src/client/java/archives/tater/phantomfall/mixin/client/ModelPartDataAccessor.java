@@ -8,6 +8,6 @@ import java.util.Map;
 
 @Mixin(ModelPartData.class)
 public interface ModelPartDataAccessor {
-    @Accessor
-    Map<String, ModelPartData> getChildren();
+    @Accessor("children")
+    Map<String, ModelPartData> phantomfall$getChildren();
 }
