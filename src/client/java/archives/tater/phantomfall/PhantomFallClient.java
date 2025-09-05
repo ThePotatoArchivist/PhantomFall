@@ -1,6 +1,7 @@
 package archives.tater.phantomfall;
 
 import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
+import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -52,7 +53,7 @@ public class PhantomFallClient implements ClientModInitializer {
                 registrationHelper.register(new PhantomBodyFeatureRenderer((FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel>) entityRenderer, context.getEntityModels()));
 		});
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
-				PhantomBodyComponent.KEY.get(player).getPhantom() == null);
+				((PhantomBodyRenderState.Holder) player).phantomfall$getPhantomBodyData().hasPhantom);
 		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
 			if (!PhantomFall.CONFIG.client.changePerspective) return;
 			var clientPlayer = MinecraftClient.getInstance().player;
