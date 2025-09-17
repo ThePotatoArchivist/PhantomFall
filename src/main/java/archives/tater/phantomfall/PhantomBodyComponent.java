@@ -20,6 +20,10 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     private final PlayerEntity owner;
     private @Nullable PhantomEntity phantom;
 
+    // Client usage only
+    public float lastPitch;
+    public float lastYaw;
+
     public static final String PHANTOM_KEY = "Phantom";
 
     public PhantomBodyComponent(PlayerEntity owner) {
@@ -31,7 +35,7 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     }
 
     public void setPhantomFrom(@NotNull PhantomEntity phantom) {
-        this.phantom = new PhantomEntity(EntityType.PHANTOM, phantom.getWorld());
+        this.phantom = new PhantomEntity(EntityType.PHANTOM, phantom.getEntityWorld());
         this.phantom.copyFrom(phantom);
         KEY.sync(owner);
     }
@@ -49,7 +53,7 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
             return;
         }
         if (phantom == null)
-            phantom = EntityType.PHANTOM.create(owner.getWorld(), SpawnReason.NATURAL);
+            phantom = EntityType.PHANTOM.create(owner.getEntityWorld(), SpawnReason.NATURAL);
         if (phantom != null)
             phantom.readData(phantomData.get());
     }
@@ -65,11 +69,11 @@ public class PhantomBodyComponent implements Component, AutoSyncedComponent, Ser
     @Override
     public void serverTick() {
         var phantom = this.phantom;
-        if (!(owner.getWorld() instanceof ServerWorld world) || phantom == null || (owner.isAlive() && owner.isGliding() && PhantomFall.canWearPhantom(owner))) return;
+        if (!(owner.getEntityWorld() instanceof ServerWorld world) || phantom == null || (owner.isAlive() && owner.isGliding() && PhantomFall.canWearPhantom(owner))) return;
         clearPhantom();
         phantom.setPosition(owner.getPos());
         phantom.setVelocity(Vec3d.ZERO);
-        owner.getWorld().spawnEntity(phantom);
+        owner.getEntityWorld().spawnEntity(phantom);
         phantom.damage(world, owner.getDamageSources().playerAttack(owner), Float.MAX_VALUE);
     }
 }

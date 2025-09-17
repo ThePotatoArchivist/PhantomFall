@@ -99,7 +99,7 @@ public class PhantomFall implements ModInitializer {
 				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
 
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
-			var world = entity.getWorld();
+			var world = entity.getEntityWorld();
 			if (!(world instanceof ServerWorld serverWorld)) return;
 			if (!(entity instanceof PlayerEntity player)) return;
 			var phantomsSpawned = PhantomsSpawnedComponent.KEY.get(player);

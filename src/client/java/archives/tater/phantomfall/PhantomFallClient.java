@@ -1,5 +1,6 @@
 package archives.tater.phantomfall;
 
+import archives.tater.phantomfall.model.PhantomBodyModel;
 import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 import net.fabricmc.api.ClientModInitializer;
@@ -46,7 +47,7 @@ public class PhantomFallClient implements ClientModInitializer {
     @Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY, PhantomBodyFeatureRenderer::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY, () -> PhantomBodyModel.getTexturedModelData());
 
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
 			if (entityType == EntityType.PLAYER)

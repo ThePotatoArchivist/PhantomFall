@@ -2,39 +2,41 @@ package archives.tater.phantomfall.render;
 
 import archives.tater.phantomfall.PhantomBodyComponent;
 import archives.tater.phantomfall.PhantomFallClient;
-import archives.tater.phantomfall.mixin.client.ModelPartDataAccessor;
-import archives.tater.phantomfall.mixin.client.PhantomEntityModelAccessor;
-import archives.tater.phantomfall.mixin.client.TextureModelDataAccessor;
+import archives.tater.phantomfall.model.PhantomBodyModel;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.*;
+import net.minecraft.client.render.entity.model.EntityModelPartNames;
+import net.minecraft.client.render.entity.model.LoadedEntityModels;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.state.PhantomEntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.PlayerLikeEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
 @Environment(EnvType.CLIENT)
 public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
-    private final PhantomEntityModel model;
+    private final PhantomBodyModel model;
 
     private static final Identifier TEXTURE = Identifier.ofVanilla("textures/entity/phantom.png");
 
     public PhantomBodyFeatureRenderer(FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel> context, LoadedEntityModels loader) {
         super(context);
-        model = new PhantomEntityModel(loader.getModelPart(PhantomFallClient.PHANTOM_BODY));
+        model = new PhantomBodyModel(loader.getModelPart(PhantomFallClient.PHANTOM_BODY));
         model.getRootPart().getChild(EntityModelPartNames.BODY).pitch = 0;
     }
 
-    public static void updateState(AbstractClientPlayerEntity player, PlayerEntityRenderState state) {
+    public static void updateState(PlayerLikeEntity player, PlayerEntityRenderState state) {
         var phantomState = ((PhantomBodyRenderState.Holder) state).phantomfall$getPhantomBodyData();
-        var phantom = PhantomBodyComponent.KEY.get(player).getPhantom();
+        var phantomComponent = PhantomBodyComponent.KEY.get(player);
+        var phantom = phantomComponent.getPhantom();
 
         if (phantom == null) {
             phantomState.hasPhantom = false;
@@ -51,13 +53,13 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
         var pitch = (float) (value * (Math.PI / 18) + value * Math.PI / 12);
         var yaw = (float) (value * (-Math.PI / 4) + value * Math.PI / 12);
 
-        phantomState.pitch = phantomState.pitch + (pitch - phantomState.pitch) * 0.1f;
-        phantomState.yaw = phantomState.yaw + (yaw - phantomState.yaw) * 0.1f;
+        phantomState.pitch = phantomComponent.lastPitch = phantomComponent.lastPitch + (pitch - phantomComponent.lastPitch) * 0.1f;
+        phantomState.yaw = phantomComponent.lastYaw = phantomComponent.lastYaw + (yaw - phantomComponent.lastYaw) * 0.1f;
         phantomState.size = phantom.getPhantomSize();
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
+    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
         var phantomState = ((PhantomBodyRenderState.Holder) state).phantomfall$getPhantomBodyData();
         if (!phantomState.hasPhantom) return;
         var pitch = phantomState.pitch;
@@ -77,24 +79,12 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
         matrices.translate(1 / 32.0, -1 / 16.0, 8 / 16.0); // Model center
 
-        setAngles(model, pitch, yaw);
-        model.render(matrices, vertexConsumers.getBuffer(model.getLayer(TEXTURE)), light, OverlayTexture.DEFAULT_UV);
+        var renderState = new PhantomEntityRenderState();
+        renderState.entityType = EntityType.PHANTOM;
+        renderState.wingFlapProgress = yaw;
+        queue.submitModel(model, renderState, matrices, model.getLayer(TEXTURE), light, OverlayTexture.DEFAULT_UV, 0, null);
 
         matrices.pop();
     }
 
-    private static void setAngles(PhantomEntityModel model, float pitch, float yaw) {
-        var accessor = (PhantomEntityModelAccessor) model;
-
-        accessor.getLeftWingBase().yaw = yaw;
-        accessor.getLeftWingTip().yaw = yaw;
-        accessor.getRightWingBase().yaw = -yaw;
-        accessor.getRightWingTip().yaw = -yaw;
-    }
-
-    public static TexturedModelData getTexturedModelData() {
-        var data = PhantomEntityModel.getTexturedModelData();
-        ((ModelPartDataAccessor) ((TextureModelDataAccessor) data).getData().getRoot().getChild(EntityModelPartNames.BODY)).phantomfall$getChildren().remove(EntityModelPartNames.HEAD);
-        return data;
-    }
 }
