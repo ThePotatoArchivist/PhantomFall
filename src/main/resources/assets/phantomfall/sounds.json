@@ -2,8 +2,8 @@
   "event.mob_effect.insomnia_omen": {
     "sounds": [
       {
-        "name": "mob/phantom/swoop1",
-        "pitch": 0.5,
+        "name": "phantomfall:insomnia_omen",
+        "pitch": 0.6,
         "volume": 1.5
       }
     ],

@@ -132,10 +132,11 @@ public class PhantomFall implements ModInitializer {
 				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
 
         EntitySleepEvents.START_SLEEPING.register((entity, sleepingPos) -> {
-            if (!entity.hasStatusEffect(StatusEffects.BAD_OMEN)) return;
-            var amplifier = entity.getStatusEffect(StatusEffects.BAD_OMEN).getAmplifier();
+            var badOmenInstance = entity.getStatusEffect(StatusEffects.BAD_OMEN);
+            if (badOmenInstance == null) return;
+            var amplifier = badOmenInstance.getAmplifier();
             entity.removeStatusEffect(StatusEffects.BAD_OMEN);
-            entity.addStatusEffect(new StatusEffectInstance(INSOMNIA_OMEN, (amplifier + 1) * 5 * 60 * 20));
+            entity.addStatusEffect(new StatusEffectInstance(INSOMNIA_OMEN, (amplifier + 1) * 20 * 60 * 20));
         });
 
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
