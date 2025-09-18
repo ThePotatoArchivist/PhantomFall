@@ -1,0 +1,12 @@
+{
+  "event.mob_effect.insomnia_omen": {
+    "sounds": [
+      {
+        "name": "phantomfall:insomnia_omen",
+        "pitch": 0.6,
+        "volume": 1.5
+      }
+    ],
+    "subtitle": "subtitles.event.mob_effect.phantomfall.insomnia_omen"
+  }
+}

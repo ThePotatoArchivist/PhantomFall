@@ -4,17 +4,29 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.damage.DamageType;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.SpawnHelper;
@@ -39,6 +51,10 @@ public class PhantomFall implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    private static SoundEvent registerSound(Identifier id) {
+        return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
+    }
+
 	public static final PhantomFallConfig CONFIG = PhantomFallConfig.createToml(
 			FabricLoader.getInstance().getConfigDir(),
 			MOD_ID,
@@ -47,6 +63,20 @@ public class PhantomFall implements ModInitializer {
 	);
 
 	public static final TagKey<DamageType> PHANTOM_PICKUP = TagKey.of(RegistryKeys.DAMAGE_TYPE, id("phantom_pickup"));
+
+    public static final SimpleParticleType INSOMNIA_OMEN_PARTICLE = Registry.register(
+            Registries.PARTICLE_TYPE,
+            id("insomnia_omen"),
+            FabricParticleTypes.simple()
+    );
+
+    public static final SoundEvent EVENT_MOB_EFFECT_INSOMNIA_OMEN = registerSound(id("event.mob_effect.insomnia_omen"));
+
+    public static final RegistryEntry<StatusEffect> INSOMNIA_OMEN = Registry.registerReference(
+            Registries.STATUS_EFFECT,
+            id("insomnia_omen"),
+            new StatusEffect(StatusEffectCategory.NEUTRAL, 0x5061A4FF, INSOMNIA_OMEN_PARTICLE) {}.applySound(EVENT_MOB_EFFECT_INSOMNIA_OMEN)
+    );
 
 	public static boolean canWearPhantom(PlayerEntity player) {
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES)
@@ -65,6 +95,10 @@ public class PhantomFall implements ModInitializer {
 		}
 		return sizes;
 	}
+
+    public static boolean hasInsomniaOrOmen(LivingEntity entity) {
+        return entity.hasStatusEffect(StatusEffects.BAD_OMEN) || entity.hasStatusEffect(INSOMNIA_OMEN);
+    }
 
 	@Override
 	public void onInitialize() {
@@ -98,6 +132,19 @@ public class PhantomFall implements ModInitializer {
 		EntityElytraEvents.CUSTOM.register((entity, tickElytra) ->
 				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
 
+        EntitySleepEvents.START_SLEEPING.register((entity, sleepingPos) -> {
+            var badOmenInstance = entity.getStatusEffect(StatusEffects.BAD_OMEN);
+            if (badOmenInstance == null) return;
+            var amplifier = badOmenInstance.getAmplifier();
+            entity.removeStatusEffect(StatusEffects.BAD_OMEN);
+            entity.addStatusEffect(new StatusEffectInstance(INSOMNIA_OMEN, (amplifier + 1) * 20 * 60 * 20));
+        });
+
+        EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
+        EntitySleepEvents.ALLOW_RESETTING_TIME.register(player -> !hasInsomniaOrOmen(player));
+        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.getWorld().getDimension().hasFixedTime() ? ActionResult.SUCCESS : ActionResult.PASS);
+        EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? ActionResult.SUCCESS : ActionResult.PASS);
+
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
 			var world = entity.getWorld();
 			if (!(world instanceof ServerWorld serverWorld)) return;
@@ -105,16 +152,16 @@ public class PhantomFall implements ModInitializer {
 			var phantomsSpawned = PhantomsSpawnedComponent.KEY.get(player);
 			if (!phantomsSpawned.canSpawnPhantoms()) return;
 			world.calculateAmbientDarkness(); // day/night is based on ambient light which normally only updates every tick
-			if (!world.isNight()) {
+			if (!world.isNight() && !hasInsomniaOrOmen(player)) {
 				phantomsSpawned.resetAmount();
 				return;
 			}
-			if (!world.isSkyVisible(entity.getBlockPos())) return;
+			if (world.getDimension().hasSkyLight() && !world.isSkyVisible(entity.getBlockPos())) return;
 
 			var spawnedPhantoms = phantomsSpawned.getAmount();
 			var random = world.getRandom();
 
-			if (random.nextFloat() > CONFIG.server.baseSpawnChance + CONFIG.server.spawnChanceIncrease * spawnedPhantoms) return;
+			if (!hasInsomniaOrOmen(player) && random.nextFloat() > CONFIG.server.baseSpawnChance + CONFIG.server.spawnChanceIncrease * spawnedPhantoms) return;
 
 			var success = false;
 
