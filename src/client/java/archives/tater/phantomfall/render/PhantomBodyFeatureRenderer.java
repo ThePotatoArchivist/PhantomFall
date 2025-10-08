@@ -2,21 +2,17 @@ package archives.tater.phantomfall.render;
 
 import archives.tater.phantomfall.PhantomFallAttachments;
 import archives.tater.phantomfall.PhantomFallClient;
-import archives.tater.phantomfall.mixin.client.ModelPartDataAccessor;
-import archives.tater.phantomfall.mixin.client.TextureModelDataAccessor;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.render.entity.model.LoadedEntityModels;
-import net.minecraft.client.render.entity.model.PhantomEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
@@ -85,9 +81,4 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
         matrices.pop();
     }
 
-    public static TexturedModelData getTexturedModelData() {
-        var data = PhantomEntityModel.getTexturedModelData();
-        ((ModelPartDataAccessor) ((TextureModelDataAccessor) data).getData().getRoot().getChild(EntityModelPartNames.BODY)).phantomfall$getChildren().remove(EntityModelPartNames.HEAD);
-        return data;
-    }
 }

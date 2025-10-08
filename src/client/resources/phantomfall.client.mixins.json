@@ -7,7 +7,6 @@
     "LivingEntityRendererMixin",
     "MinecraftClientMixin",
     "ModelPartDataAccessor",
-    "PhantomEntityModelAccessor",
     "PlayerEntityRendererMixin",
     "TextureModelDataAccessor"
   ],
