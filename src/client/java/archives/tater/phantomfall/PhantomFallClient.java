@@ -19,6 +19,9 @@ import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
+import static archives.tater.phantomfall.PhantomFallAttachments.PHANTOM_DATA;
+
+@SuppressWarnings("UnstableApiUsage")
 public class PhantomFallClient implements ClientModInitializer {
 
 	private static boolean perspectiveChanged = false;
@@ -62,7 +65,7 @@ public class PhantomFallClient implements ClientModInitializer {
 			if (!PhantomFall.CONFIG.client.changePerspective) return;
 			var clientPlayer = MinecraftClient.getInstance().player;
 			if (clientPlayer == null) return;
-			if (PhantomBodyComponent.KEY.get(clientPlayer).getPhantom() != null) {
+			if (clientPlayer.hasAttached(PHANTOM_DATA)) {
 				if (!perspectiveChanged) {
 					savePerspective();
 					perspectiveChanged = true;

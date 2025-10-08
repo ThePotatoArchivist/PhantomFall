@@ -1,20 +1,25 @@
 package archives.tater.phantomfall.render;
 
-import archives.tater.phantomfall.PhantomBodyComponent;
+import archives.tater.phantomfall.PhantomFallAttachments;
 import archives.tater.phantomfall.PhantomFallClient;
 import archives.tater.phantomfall.mixin.client.ModelPartDataAccessor;
 import archives.tater.phantomfall.mixin.client.PhantomEntityModelAccessor;
 import archives.tater.phantomfall.mixin.client.TextureModelDataAccessor;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.*;
+import net.minecraft.client.render.entity.model.EntityModelPartNames;
+import net.minecraft.client.render.entity.model.LoadedEntityModels;
+import net.minecraft.client.render.entity.model.PhantomEntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -34,7 +39,7 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
     public static void updateState(AbstractClientPlayerEntity player, PlayerEntityRenderState state) {
         var phantomState = ((PhantomBodyRenderState.Holder) state).phantomfall$getPhantomBodyData();
-        var phantom = PhantomBodyComponent.KEY.get(player).getPhantom();
+        var phantom = PhantomFallAttachments.getPhantom(player);
 
         if (phantom == null) {
             phantomState.hasPhantom = false;

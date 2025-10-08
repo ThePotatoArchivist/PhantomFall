@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
+
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -30,15 +31,18 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.SpawnHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static archives.tater.phantomfall.PhantomFallAttachments.*;
 import static java.lang.Math.min;
 import static net.minecraft.entity.LivingEntity.canGlideWith;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PhantomFall implements ModInitializer {
 	public static final String MOD_ID = "phantomfall";
 
@@ -105,6 +109,8 @@ public class PhantomFall implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+        PhantomFallAttachments.register();
+
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
 			if (blocked) return;
 			if (entity.isGliding()) return;
@@ -112,7 +118,7 @@ public class PhantomFall implements ModInitializer {
 			var attacker = source.getAttacker();
 			if (!(attacker instanceof PhantomEntity)) return;
 			if (entity.getVehicle() instanceof PhantomEntity) return;
-			if ((entity instanceof PlayerEntity) && PhantomBodyComponent.KEY.get(entity).getPhantom() != null) return;
+			if ((entity instanceof PlayerEntity) && entity.hasAttached(PHANTOM_DATA)) return;
             entity.startRiding(attacker);
         });
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
@@ -123,14 +129,14 @@ public class PhantomFall implements ModInitializer {
             if (damageSource.getAttacker() != player || !canWearPhantom(player) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(entity, false)) return true;
 
             phantom.setHealth(1);
-            PhantomBodyComponent.KEY.get(player).setPhantomFrom(phantom);
+            PhantomFallAttachments.setPhantom(player, phantom);
             phantom.discard();
             player.startGliding();
 
             return false;
         });
 		EntityElytraEvents.CUSTOM.register((entity, tickElytra) ->
-				entity instanceof PlayerEntity player && PhantomBodyComponent.KEY.get(player).getPhantom() != null);
+				entity instanceof PlayerEntity player && player.hasAttached(PHANTOM_DATA));
 
         EntitySleepEvents.START_SLEEPING.register((entity, sleepingPos) -> {
             var badOmenInstance = entity.getStatusEffect(StatusEffects.BAD_OMEN);
@@ -149,16 +155,16 @@ public class PhantomFall implements ModInitializer {
 			var world = entity.getWorld();
 			if (!(world instanceof ServerWorld serverWorld)) return;
 			if (!(entity instanceof PlayerEntity player)) return;
-			var phantomsSpawned = PhantomsSpawnedComponent.KEY.get(player);
-			if (!phantomsSpawned.canSpawnPhantoms()) return;
+			int cooldown = player.getAttachedOrElse(PHANTOM_COOLDOWN, 0);
+			if (cooldown > 0) return;
 			world.calculateAmbientDarkness(); // day/night is based on ambient light which normally only updates every tick
 			if (!world.isNight() && !hasInsomniaOrOmen(player)) {
-				phantomsSpawned.resetAmount();
+				player.removeAttached(PHANTOMS_SPAWNED);
 				return;
 			}
 			if (world.getDimension().hasSkyLight() && !world.isSkyVisible(entity.getBlockPos())) return;
 
-			var spawnedPhantoms = phantomsSpawned.getAmount();
+			int spawnedPhantoms = player.getAttachedOrElse(PHANTOMS_SPAWNED, 0);
 			var random = world.getRandom();
 
 			if (!hasInsomniaOrOmen(player) && random.nextFloat() > CONFIG.server.baseSpawnChance + CONFIG.server.spawnChanceIncrease * spawnedPhantoms) return;
@@ -180,8 +186,8 @@ public class PhantomFall implements ModInitializer {
 
 			if (success) {
 				player.playSoundToPlayer(SoundEvents.ENTITY_PHANTOM_AMBIENT, player.getSoundCategory(), 1f, 0.6f);
-				phantomsSpawned.increaseAmount();
-				phantomsSpawned.setCooldown();
+                PhantomFallAttachments.increaseAmount(player);
+                PhantomFallAttachments.setCooldown(player);
 			}
 		});
 	}
