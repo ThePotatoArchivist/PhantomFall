@@ -3,12 +3,16 @@ package archives.tater.phantomfall;
 import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.particle.SpellParticle;
@@ -27,7 +31,11 @@ public class PhantomFallClient implements ClientModInitializer {
 	private static boolean perspectiveChanged = false;
 	private static @Nullable Perspective savedPerspective = null;
 
-	public static EntityModelLayer PHANTOM_BODY = new EntityModelLayer(PhantomFall.id("phantom_body"), "main");
+	public static EntityModelLayer PHANTOM_BODY_LAYER = new EntityModelLayer(PhantomFall.id("phantom_body"), "main");
+
+    public static RenderStateDataKey<PhantomBodyRenderState> PHANTOM_BODY = RenderStateDataKey.create(() -> "phantom_body");
+
+    public static AttachmentType<PhantomBodyRenderState> PHANTOM_BODY_LAST = AttachmentRegistry.create(PhantomFall.id("phantom_body_last"));
 
 	public static void savePerspective() {
 		var options = MinecraftClient.getInstance().options;
@@ -51,7 +59,7 @@ public class PhantomFallClient implements ClientModInitializer {
     @Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY, PhantomBodyFeatureRenderer::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY_LAYER, PhantomBodyFeatureRenderer::getTexturedModelData);
 
         ParticleFactoryRegistry.getInstance().register(PhantomFall.INSOMNIA_OMEN_PARTICLE, SpellParticle.DefaultFactory::new);
 
@@ -60,7 +68,7 @@ public class PhantomFallClient implements ClientModInitializer {
                 registrationHelper.register(new PhantomBodyFeatureRenderer((FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel>) entityRenderer, context.getEntityModels()));
 		});
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
-				((PhantomBodyRenderState.Holder) player).phantomfall$getPhantomBodyData().hasPhantom);
+				player.getData(PHANTOM_BODY) == null);
 		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
 			if (!PhantomFall.CONFIG.client.changePerspective) return;
 			var clientPlayer = MinecraftClient.getInstance().player;

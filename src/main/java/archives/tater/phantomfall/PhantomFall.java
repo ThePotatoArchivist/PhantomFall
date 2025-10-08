@@ -148,11 +148,11 @@ public class PhantomFall implements ModInitializer {
 
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
         EntitySleepEvents.ALLOW_RESETTING_TIME.register(player -> !hasInsomniaOrOmen(player));
-        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.getWorld().getDimension().hasFixedTime() ? ActionResult.SUCCESS : ActionResult.PASS);
+        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.getEntityWorld().getDimension().hasFixedTime() ? ActionResult.SUCCESS : ActionResult.PASS);
         EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? ActionResult.SUCCESS : ActionResult.PASS);
 
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
-			var world = entity.getWorld();
+			var world = entity.getEntityWorld();
 			if (!(world instanceof ServerWorld serverWorld)) return;
 			if (!(entity instanceof PlayerEntity player)) return;
 			int cooldown = player.getAttachedOrElse(PHANTOM_COOLDOWN, 0);

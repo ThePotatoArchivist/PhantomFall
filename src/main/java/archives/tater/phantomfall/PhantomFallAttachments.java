@@ -67,7 +67,7 @@ public class PhantomFallAttachments {
     }
 
     public static @Nullable PhantomEntity getPhantom(Entity entity) {
-        return getPhantom(entity, entity.getWorld());
+        return getPhantom(entity, entity.getEntityWorld());
     }
 
     public static void increaseAmount(AttachmentTarget target) {
@@ -85,13 +85,13 @@ public class PhantomFallAttachments {
         }
 
         var phantomData = player.getAttached(PHANTOM_DATA);
-        if (!(player.getWorld() instanceof ServerWorld serverWorld) || phantomData == null || (player.isAlive() && player.isGliding() && PhantomFall.canWearPhantom(player))) return;
+        if (!(player.getEntityWorld() instanceof ServerWorld serverWorld) || phantomData == null || (player.isAlive() && player.isGliding() && PhantomFall.canWearPhantom(player))) return;
         player.removeAttached(PHANTOM_DATA);
-        var phantom = createPhantom(phantomData, player.getWorld());
+        var phantom = createPhantom(phantomData, serverWorld);
         if (phantom == null) return;
-        phantom.setPosition(player.getPos());
+        phantom.setPosition(player.getEntityPos());
         phantom.setVelocity(Vec3d.ZERO);
-        player.getWorld().spawnEntity(phantom);
+        serverWorld.spawnEntity(phantom);
         phantom.damage(serverWorld, player.getDamageSources().playerAttack(player), Float.MAX_VALUE);
     }
 

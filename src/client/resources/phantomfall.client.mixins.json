@@ -9,7 +9,6 @@
     "ModelPartDataAccessor",
     "PhantomEntityModelAccessor",
     "PlayerEntityRendererMixin",
-    "PlayerEntityRenderStateMixin",
     "TextureModelDataAccessor"
   ],
   "injectors": {
