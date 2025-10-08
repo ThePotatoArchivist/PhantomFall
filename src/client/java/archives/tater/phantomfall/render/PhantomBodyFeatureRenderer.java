@@ -4,9 +4,6 @@ import archives.tater.phantomfall.PhantomFallAttachments;
 import archives.tater.phantomfall.PhantomFallClient;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -20,7 +17,6 @@ import net.minecraft.entity.PlayerLikeEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
-@Environment(EnvType.CLIENT)
 public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
     private final PhantomBodyModel model;
 
