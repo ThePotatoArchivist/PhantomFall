@@ -44,8 +44,8 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
         var lastState = player.getAttachedOrCreate(PhantomFallClient.PHANTOM_BODY_LAST, PhantomBodyRenderState::new);
 
-        phantomState.bodyPitch = lastState.bodyPitch = lastState.bodyPitch + (pitch - lastState.bodyPitch) * 0.1f;
-        phantomState.wingYaw = lastState.wingYaw = lastState.wingYaw + (yaw - lastState.wingYaw) * 0.1f;
+        phantomState.pitch = lastState.pitch = lastState.pitch + (pitch - lastState.pitch) * 0.1f;
+        phantomState.yaw = lastState.yaw = lastState.yaw + (yaw - lastState.yaw) * 0.1f;
         phantomState.size = phantom.getPhantomSize();
 
         state.setData(PhantomFallClient.PHANTOM_BODY, phantomState);
@@ -55,8 +55,8 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntityRend
     public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
         var phantomState = state.getData(PhantomFallClient.PHANTOM_BODY);
         if (phantomState == null) return;
-        var pitch = phantomState.bodyPitch;
-        var yaw = phantomState.wingYaw;
+        var pitch = phantomState.pitch;
+        var yaw = phantomState.yaw;
         var size = phantomState.size;
 
         matrices.push();

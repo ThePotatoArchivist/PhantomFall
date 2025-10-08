@@ -39,7 +39,7 @@ public class PhantomBodyModel extends Model<PhantomBodyRenderState> {
     @Override
     public void setAngles(PhantomBodyRenderState state) {
         super.setAngles(state);
-        var yaw = state.wingYaw;
+        var yaw = state.yaw;
         leftWingBase.yaw = yaw;
         leftWingTip.yaw = yaw;
         rightWingBase.yaw = -yaw;
