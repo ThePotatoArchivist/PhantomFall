@@ -20,9 +20,6 @@
 		],
 		"client": [
 			"archives.tater.phantomfall.PhantomFallClient"
-		],
-		"cardinal-components": [
-			"archives.tater.phantomfall.PhantomFallComponents"
 		]
 	},
 	"mixins": [
@@ -32,18 +29,11 @@
 			"environment": "client"
 		}
 	],
-	"custom": {
-		"cardinal-components": [
-			"phantomfall:phantom_body",
-			"phantomfall:phantoms_spawned"
-		]
-	},
 	"depends": {
 		"fabricloader": ">=0.16.10",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
-		"fabric-api": "*",
-		"cardinal-components-entity": "~6.1.2"
+		"fabric-api": "*"
 	},
 	"suggests": {
 		"mcqoy": "*"

@@ -1,6 +1,6 @@
 package archives.tater.phantomfall.render;
 
-import archives.tater.phantomfall.PhantomBodyComponent;
+import archives.tater.phantomfall.PhantomFallAttachments;
 import archives.tater.phantomfall.mixin.client.PhantomEntityModelAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,7 +31,7 @@ public class PhantomBodyFeatureRenderer extends FeatureRenderer<PlayerEntity, Pl
 
     @Override
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, PlayerEntity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        var phantom = PhantomBodyComponent.KEY.get(entity).getPhantom();
+        var phantom = PhantomFallAttachments.getPhantom(entity);
         if (phantom == null) return;
 
         var velocityNormY = entity.getVelocity().normalize().y;
