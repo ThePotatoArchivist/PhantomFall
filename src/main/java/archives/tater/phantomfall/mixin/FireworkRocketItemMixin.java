@@ -17,6 +17,6 @@ public class FireworkRocketItemMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isFallFlying()Z")
     )
     private boolean checkPhantom(Player instance, Operation<Boolean> original) {
-        return original.call(instance) && instance.hasAttached(PHANTOM_DATA);
+        return original.call(instance) && !instance.hasAttached(PHANTOM_DATA);
     }
 }
