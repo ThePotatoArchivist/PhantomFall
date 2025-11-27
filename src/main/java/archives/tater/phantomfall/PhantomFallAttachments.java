@@ -4,29 +4,27 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.Vec3;
 import com.mojang.serialization.Codec;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.mob.PhantomEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.util.ErrorReporter;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PhantomFallAttachments {
-    public static final AttachmentType<NbtCompound> PHANTOM_DATA = AttachmentRegistry.create(PhantomFall.id("phantom_data"), builder -> builder
-            .persistent(NbtCompound.CODEC)
-            .syncWith(PacketCodecs.NBT_COMPOUND, AttachmentSyncPredicate.all())
+    public static final AttachmentType<CompoundTag> PHANTOM_DATA = AttachmentRegistry.create(PhantomFall.id("phantom_data"), builder -> builder
+            .persistent(CompoundTag.CODEC)
+            .syncWith(ByteBufCodecs.COMPOUND_TAG, AttachmentSyncPredicate.all())
     );
 
     public static final AttachmentType<Integer> PHANTOMS_SPAWNED = AttachmentRegistry.create(PhantomFall.id("phantoms_spawned"), builder -> builder
@@ -38,26 +36,26 @@ public class PhantomFallAttachments {
             .copyOnDeath()
     );
 
-    public static final AttachmentType<PhantomEntity> CACHED_PHANTOM = AttachmentRegistry.create(PhantomFall.id("cached_phantom"));
+    public static final AttachmentType<Phantom> CACHED_PHANTOM = AttachmentRegistry.create(PhantomFall.id("cached_phantom"));
 
-    public static void setPhantom(AttachmentTarget target, PhantomEntity phantom) {
-        try (var logging = new ErrorReporter.Logging(phantom.getErrorReporterContext(), PhantomFall.LOGGER)) {
-            var writeView = NbtWriteView.create(logging, phantom.getRegistryManager());
-            phantom.writeData(writeView);
-            target.setAttached(PHANTOM_DATA, writeView.getNbt());
+    public static void setPhantom(AttachmentTarget target, Phantom phantom) {
+        try (var logging = new ProblemReporter.ScopedCollector(phantom.problemPath(), PhantomFall.LOGGER)) {
+            var writeView = TagValueOutput.createWithContext(logging, phantom.registryAccess());
+            phantom.saveWithoutId(writeView);
+            target.setAttached(PHANTOM_DATA, writeView.buildResult());
         }
     }
 
-    private static @Nullable PhantomEntity createPhantom(NbtCompound data, World world) {
-        var phantom = EntityType.PHANTOM.create(world, SpawnReason.NATURAL);
+    private static @Nullable Phantom createPhantom(CompoundTag data, Level world) {
+        var phantom = EntityType.PHANTOM.create(world, EntitySpawnReason.NATURAL);
         if (phantom == null) return null;
-        try (var logging = new ErrorReporter.Logging(phantom.getErrorReporterContext(), PhantomFall.LOGGER)) {
-            phantom.readData(NbtReadView.create(logging, world.getRegistryManager(), data));
+        try (var logging = new ProblemReporter.ScopedCollector(phantom.problemPath(), PhantomFall.LOGGER)) {
+            phantom.load(TagValueInput.create(logging, world.registryAccess(), data));
         }
         return phantom;
     }
 
-    public static @Nullable PhantomEntity getPhantom(AttachmentTarget target, World world) {
+    public static @Nullable Phantom getPhantom(AttachmentTarget target, Level world) {
         var phantomData = target.getAttached(PHANTOM_DATA);
         if (phantomData == null) return null;
         if (target.hasAttached(CACHED_PHANTOM)) return target.getAttached(CACHED_PHANTOM);
@@ -66,8 +64,8 @@ public class PhantomFallAttachments {
         return phantom;
     }
 
-    public static @Nullable PhantomEntity getPhantom(Entity entity) {
-        return getPhantom(entity, entity.getEntityWorld());
+    public static @Nullable Phantom getPhantom(Entity entity) {
+        return getPhantom(entity, entity.level());
     }
 
     public static void increaseAmount(AttachmentTarget target) {
@@ -78,21 +76,21 @@ public class PhantomFallAttachments {
         target.setAttached(PHANTOM_COOLDOWN, 20 * PhantomFall.CONFIG.server.spawnCooldown);
     }
 
-    public static void tickAttachments(ServerPlayerEntity player) {
+    public static void tickAttachments(ServerPlayer player) {
         int cooldown = player.getAttachedOrElse(PHANTOM_COOLDOWN, 0);
         if (cooldown > 0) {
             player.setAttached(PHANTOM_COOLDOWN, cooldown - 1);
         }
 
         var phantomData = player.getAttached(PHANTOM_DATA);
-        if (!(player.getEntityWorld() instanceof ServerWorld serverWorld) || phantomData == null || (player.isAlive() && player.isGliding() && PhantomFall.canWearPhantom(player))) return;
+        if (!(player.level() instanceof ServerLevel serverWorld) || phantomData == null || (player.isAlive() && player.isFallFlying() && PhantomFall.canWearPhantom(player))) return;
         player.removeAttached(PHANTOM_DATA);
         var phantom = createPhantom(phantomData, serverWorld);
         if (phantom == null) return;
-        phantom.setPosition(player.getEntityPos());
-        phantom.setVelocity(Vec3d.ZERO);
-        serverWorld.spawnEntity(phantom);
-        phantom.damage(serverWorld, player.getDamageSources().playerAttack(player), Float.MAX_VALUE);
+        phantom.setPos(player.position());
+        phantom.setDeltaMovement(Vec3.ZERO);
+        serverWorld.addFreshEntity(phantom);
+        phantom.hurtServer(serverWorld, player.damageSources().playerAttack(player), Float.MAX_VALUE);
     }
 
     public static void register() {

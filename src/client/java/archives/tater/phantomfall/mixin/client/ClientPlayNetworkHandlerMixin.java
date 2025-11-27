@@ -2,30 +2,30 @@ package archives.tater.phantomfall.mixin.client;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.PhantomEntity;
-import net.minecraft.text.Text;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public class ClientPlayNetworkHandlerMixin {
     @WrapWithCondition(
-            method = "onEntityPassengersSet",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;setOverlayMessage(Lnet/minecraft/text/Text;Z)V")
+            method = "handleSetEntityPassengersPacket",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V")
     )
-    private boolean checkPhantom(InGameHud instance, Text message, boolean tinted, @Local(ordinal = 0) Entity entity) {
-        return !(entity instanceof PhantomEntity);
+    private boolean checkPhantom(Gui instance, Component message, boolean tinted, @Local(ordinal = 0) Entity entity) {
+        return !(entity instanceof Phantom);
     }
 
     @WrapWithCondition(
-            method = "onEntityPassengersSet",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/NarratorManager;narrateSystemImmediately(Lnet/minecraft/text/Text;)V")
+            method = "handleSetEntityPassengersPacket",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/GameNarrator;saySystemNow(Lnet/minecraft/network/chat/Component;)V")
     )
-    private boolean checkPhantom(NarratorManager instance, Text text, @Local(ordinal = 0) Entity entity) {
-        return !(entity instanceof PhantomEntity);
+    private boolean checkPhantom(GameNarrator instance, Component text, @Local(ordinal = 0) Entity entity) {
+        return !(entity instanceof Phantom);
     }
 }

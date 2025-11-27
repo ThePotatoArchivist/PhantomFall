@@ -1,6 +1,6 @@
 package archives.tater.phantomfall.mixin;
 
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -13,7 +13,7 @@ public class GameRulesMixin {
             slice = @Slice(
                     from = @At(value = "CONSTANT", args = "stringValue=doInsomnia")
             ),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules$BooleanRule;create(Z)Lnet/minecraft/world/GameRules$Type;", ordinal = 0),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules$BooleanValue;create(Z)Lnet/minecraft/world/level/GameRules$Type;", ordinal = 0),
             index = 0
     )
     private static boolean insomniaOffDefault(boolean initialValue) {
