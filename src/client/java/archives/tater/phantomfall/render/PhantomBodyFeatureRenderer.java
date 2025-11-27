@@ -5,21 +5,21 @@ import archives.tater.phantomfall.PhantomFallClient;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.PartNames;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Avatar;
 
 public class PhantomBodyFeatureRenderer extends RenderLayer<AvatarRenderState, PlayerModel> {
     private final PhantomBodyModel model;
 
-    private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/phantom.png");
+    private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/phantom.png");
 
     public PhantomBodyFeatureRenderer(RenderLayerParent<AvatarRenderState, PlayerModel> context, EntityModelSet loader) {
         super(context);

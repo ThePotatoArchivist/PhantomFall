@@ -23,7 +23,7 @@ public abstract class ServerPlayerEntityMixin extends Player {
 
     @ModifyExpressionValue(
             method = "startSleepInBed",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/DimensionType;natural()Z")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/attribute/BedRule;canSleep(Lnet/minecraft/world/level/Level;)Z")
     )
     private boolean allowInsomniaOmen(boolean original) {
         return original || PhantomFall.hasInsomniaOrOmen(this);

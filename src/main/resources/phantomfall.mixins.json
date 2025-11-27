@@ -10,6 +10,7 @@
     "MobEntityMixin",
     "PhantomEntityMixin",
     "PlayerEntityMixin",
+    "PlayerMixin",
     "ProjectileUtilMixin",
     "ServerPlayerEntityMixin"
   ],

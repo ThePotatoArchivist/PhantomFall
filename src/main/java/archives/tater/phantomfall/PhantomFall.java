@@ -11,10 +11,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -44,8 +46,8 @@ import static net.minecraft.world.entity.LivingEntity.canGlideUsing;
 public class PhantomFall implements ModInitializer {
 	public static final String MOD_ID = "phantomfall";
 
-	public static ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+	public static Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
 	// This logger is used to write text to the console and the log file.
@@ -53,7 +55,7 @@ public class PhantomFall implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    private static SoundEvent registerSound(ResourceLocation id) {
+    private static SoundEvent registerSound(Identifier id) {
         return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
     }
 
@@ -102,6 +104,19 @@ public class PhantomFall implements ModInitializer {
         return entity.hasEffect(MobEffects.BAD_OMEN) || entity.hasEffect(INSOMNIA_OMEN);
     }
 
+    private static void playSoundTo(ServerPlayer player, SoundEvent sound, SoundSource source, float volume, float pitch) {
+        player.connection.send(new ClientboundSoundPacket(
+                BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound),
+                source,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                volume,
+                pitch,
+                player.getRandom().nextLong()
+        ));
+    }
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -146,13 +161,13 @@ public class PhantomFall implements ModInitializer {
 
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
         EntitySleepEvents.ALLOW_RESETTING_TIME.register(player -> !hasInsomniaOrOmen(player));
-        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.level().dimensionType().hasFixedTime() ? InteractionResult.SUCCESS : InteractionResult.PASS);
+//        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.level().dimensionType().hasFixedTime() ? InteractionResult.SUCCESS : InteractionResult.PASS);
         EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
 
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
 			var world = entity.level();
-			if (!(world instanceof ServerLevel serverWorld)) return;
-			if (!(entity instanceof Player player)) return;
+			if (!(entity instanceof ServerPlayer player)) return;
+            var serverWorld = player.level();
 			int cooldown = player.getAttachedOrElse(PHANTOM_COOLDOWN, 0);
 			if (cooldown > 0) return;
 			world.updateSkyBrightness(); // day/night is based on ambient light which normally only updates every tick
@@ -175,7 +190,7 @@ public class PhantomFall implements ModInitializer {
 				var phantom = EntityType.PHANTOM.create(world, EntitySpawnReason.NATURAL);
 				if (phantom == null) continue;
 				phantom.snapTo(blockPos, 0.0F, 0.0F);
-				phantom.finalizeSpawn(serverWorld, world.getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.NATURAL, null);
+				phantom.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.NATURAL, null);
 				phantom.setPhantomSize(size);
 				phantom.setHealth(phantom.getMaxHealth());
 				serverWorld.addFreshEntityWithPassengers(phantom);
@@ -183,7 +198,7 @@ public class PhantomFall implements ModInitializer {
 			}
 
 			if (success) {
-				player.playNotifySound(SoundEvents.PHANTOM_AMBIENT, player.getSoundSource(), 1f, 0.6f);
+				playSoundTo(player, SoundEvents.PHANTOM_AMBIENT, player.getSoundSource(), 1f, 0.6f);
                 PhantomFallAttachments.increaseAmount(player);
                 PhantomFallAttachments.setCooldown(player);
 			}

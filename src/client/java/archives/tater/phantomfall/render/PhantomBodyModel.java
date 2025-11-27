@@ -3,13 +3,12 @@ package archives.tater.phantomfall.render;
 import archives.tater.phantomfall.mixin.client.ModelPartDataAccessor;
 import archives.tater.phantomfall.mixin.client.TextureModelDataAccessor;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
-
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.PhantomModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.model.monster.phantom.PhantomModel;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 public class PhantomBodyModel extends Model<PhantomBodyRenderState> {
     private static final String TAIL_BASE = "tail_base";
@@ -20,7 +19,7 @@ public class PhantomBodyModel extends Model<PhantomBodyRenderState> {
     private final ModelPart rightWingTip;
 
     public PhantomBodyModel(ModelPart modelPart) {
-        super(modelPart, RenderType::entityCutoutNoCull);
+        super(modelPart, RenderTypes::entityCutoutNoCull);
         var body = modelPart.getChild(PartNames.BODY);
         var tailBase = body.getChild(TAIL_BASE);
         var tailTip = tailBase.getChild(TAIL_TIP);
