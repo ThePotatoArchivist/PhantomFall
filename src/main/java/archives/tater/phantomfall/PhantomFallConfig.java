@@ -10,12 +10,12 @@ public class PhantomFallConfig extends WrappedConfig {
     public final Client client = new Client();
     public final Server server = new Server();
 
-    public static class Client implements Section {
+    public static class Client implements folk.sisby.kaleido.api.WrappedConfig.Section {
         @Comment("Whether the player should be set to third person upon gaining phantom wings")
         public boolean changePerspective = true;
     }
 
-    public static class Server implements Section {
+    public static class Server implements folk.sisby.kaleido.api.WrappedConfig.Section {
         @Comment("Largest phantom size that can spawn naturally")
         @IntegerRange(min = 1, max = 16)
         public int maxPhantomSize = 4;
