@@ -1,12 +1,13 @@
 package archives.tater.phantomfall.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Phantom;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -18,7 +19,7 @@ public abstract class EntityMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity$MoveFunction;accept(Lnet/minecraft/world/entity/Entity;DDD)V"),
             index = 2
     )
-    protected double updatePassengerPosition(double y, @Local(argsOnly = true, ordinal = 1) Entity passenger) {
+    protected double updatePassengerPosition(double y, @Local(argsOnly = true) Entity passenger) {
         if (!((Object) this instanceof Phantom)) return y;
         return getY() - passenger.getBbHeight();
     }

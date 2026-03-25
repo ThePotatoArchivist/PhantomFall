@@ -17,5 +17,8 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "plugin": "archives.tater.phantomfall.PhantomFallMixinConfigPlugin"
+  "plugin": "archives.tater.phantomfall.PhantomFallMixinConfigPlugin",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  }
 }
