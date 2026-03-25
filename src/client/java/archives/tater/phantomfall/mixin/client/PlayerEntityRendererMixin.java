@@ -1,6 +1,6 @@
 package archives.tater.phantomfall.mixin.client;
 
-import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
+import archives.tater.phantomfall.render.PhantomBodyRenderLayer;
 import net.minecraft.client.entity.ClientAvatarEntity;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -17,6 +17,6 @@ public class PlayerEntityRendererMixin<AvatarlikeEntity extends Avatar & ClientA
             at = @At("TAIL")
     )
     private void updatePhantomBodyState(AvatarlikeEntity playerLikeEntity, AvatarRenderState playerEntityRenderState, float f, CallbackInfo ci) {
-        PhantomBodyFeatureRenderer.updateState(playerLikeEntity, playerEntityRenderState);
+        PhantomBodyRenderLayer.updateState(playerLikeEntity, playerEntityRenderState);
     }
 }

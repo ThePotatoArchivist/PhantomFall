@@ -20,7 +20,6 @@ import net.minecraft.world.phys.Vec3;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PhantomFallAttachments {
     public static final AttachmentType<CompoundTag> PHANTOM_DATA = AttachmentRegistry.create(PhantomFall.id("phantom_data"), builder -> builder
             .persistent(CompoundTag.CODEC)

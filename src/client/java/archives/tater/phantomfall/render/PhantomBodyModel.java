@@ -19,7 +19,7 @@ public class PhantomBodyModel extends Model<PhantomBodyRenderState> {
     private final ModelPart rightWingTip;
 
     public PhantomBodyModel(ModelPart modelPart) {
-        super(modelPart, RenderTypes::entityCutoutNoCull);
+        super(modelPart, RenderTypes::entityCutout);
         var body = modelPart.getChild(PartNames.BODY);
         var tailBase = body.getChild(TAIL_BASE);
         var tailTip = tailBase.getChild(TAIL_TIP);

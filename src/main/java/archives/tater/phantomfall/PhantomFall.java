@@ -5,7 +5,9 @@ import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.fabric.api.util.EventResult;
 import net.fabricmc.loader.api.FabricLoader;
+
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -19,7 +21,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.NaturalSpawner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,6 @@ import static archives.tater.phantomfall.PhantomFallAttachments.*;
 import static java.lang.Math.min;
 import static net.minecraft.world.entity.LivingEntity.canGlideUsing;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PhantomFall implements ModInitializer {
 	public static final String MOD_ID = "phantomfall";
 
@@ -162,7 +163,7 @@ public class PhantomFall implements ModInitializer {
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
         EntitySleepEvents.ALLOW_RESETTING_TIME.register(player -> !hasInsomniaOrOmen(player));
 //        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.level().dimensionType().hasFixedTime() ? InteractionResult.SUCCESS : InteractionResult.PASS);
-        EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
+        EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? EventResult.ALLOW : EventResult.PASS);
 
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
 			var world = entity.level();

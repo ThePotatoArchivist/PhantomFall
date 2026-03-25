@@ -16,18 +16,17 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Avatar;
 
-public class PhantomBodyFeatureRenderer extends RenderLayer<AvatarRenderState, PlayerModel> {
+public class PhantomBodyRenderLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
     private final PhantomBodyModel model;
 
-    private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/phantom.png");
+    private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/phantom/phantom.png");
 
-    public PhantomBodyFeatureRenderer(RenderLayerParent<AvatarRenderState, PlayerModel> context, EntityModelSet loader) {
+    public PhantomBodyRenderLayer(RenderLayerParent<AvatarRenderState, PlayerModel> context, EntityModelSet loader) {
         super(context);
         model = new PhantomBodyModel(loader.bakeLayer(PhantomFallClient.PHANTOM_BODY_LAYER));
         model.root().getChild(PartNames.BODY).xRot = 0;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static void updateState(Avatar player, AvatarRenderState state) {
         var phantom = PhantomFallAttachments.getPhantom(player);
 

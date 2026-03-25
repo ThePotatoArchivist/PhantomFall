@@ -1,18 +1,20 @@
 package archives.tater.phantomfall;
 
-import archives.tater.phantomfall.render.PhantomBodyFeatureRenderer;
+import archives.tater.phantomfall.render.PhantomBodyRenderLayer;
 import archives.tater.phantomfall.render.PhantomBodyModel;
 import archives.tater.phantomfall.render.state.PhantomBodyRenderState;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -21,11 +23,11 @@ import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.EntityType;
+
 import org.jetbrains.annotations.Nullable;
 
 import static archives.tater.phantomfall.PhantomFallAttachments.PHANTOM_DATA;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PhantomFallClient implements ClientModInitializer {
 
 	private static boolean perspectiveChanged = false;
@@ -59,17 +61,17 @@ public class PhantomFallClient implements ClientModInitializer {
     @Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-		EntityModelLayerRegistry.registerModelLayer(PHANTOM_BODY_LAYER, PhantomBodyModel::getTexturedModelData);
+		ModelLayerRegistry.registerModelLayer(PHANTOM_BODY_LAYER, PhantomBodyModel::getTexturedModelData);
 
-        ParticleFactoryRegistry.getInstance().register(PhantomFall.INSOMNIA_OMEN_PARTICLE, SpellParticle.Provider::new);
+        ParticleProviderRegistry.getInstance().register(PhantomFall.INSOMNIA_OMEN_PARTICLE, SpellParticle.Provider::new);
 
-		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
 			if (entityType == EntityType.PLAYER)
-                registrationHelper.register(new PhantomBodyFeatureRenderer((RenderLayerParent<AvatarRenderState, PlayerModel>) entityRenderer, context.getModelSet()));
+                registrationHelper.register(new PhantomBodyRenderLayer((RenderLayerParent<AvatarRenderState, PlayerModel>) entityRenderer, context.getModelSet()));
 		});
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(player ->
 				player.getData(PHANTOM_BODY) == null);
-		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+		ClientTickEvents.END_LEVEL_TICK.register(_ -> {
 			if (!PhantomFall.CONFIG.client.changePerspective) return;
 			var clientPlayer = Minecraft.getInstance().player;
 			if (clientPlayer == null) return;
