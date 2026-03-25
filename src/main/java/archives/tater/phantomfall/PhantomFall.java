@@ -125,7 +125,7 @@ public class PhantomFall implements ModInitializer {
 		// Proceed with mild caution.
         PhantomFallAttachments.register();
 
-		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, _, _, blocked) -> {
 			if (blocked) return;
 			if (entity.isFallFlying()) return;
             if (!source.is(PHANTOM_PICKUP)) return;
@@ -135,7 +135,7 @@ public class PhantomFall implements ModInitializer {
 			if ((entity instanceof Player) && entity.hasAttached(PHANTOM_DATA)) return;
             entity.startRiding(attacker);
         });
-		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
+		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, _) -> {
             if (!(entity instanceof Phantom phantom) || !(entity.getFirstPassenger() instanceof Player player)) return true;
 
 			player.removeVehicle();
@@ -149,10 +149,10 @@ public class PhantomFall implements ModInitializer {
 
             return false;
         });
-		EntityElytraEvents.CUSTOM.register((entity, tickElytra) ->
+		EntityElytraEvents.CUSTOM.register((entity, _) ->
 				entity instanceof Player player && player.hasAttached(PHANTOM_DATA));
 
-        EntitySleepEvents.START_SLEEPING.register((entity, sleepingPos) -> {
+        EntitySleepEvents.START_SLEEPING.register((entity, _) -> {
             var badOmenInstance = entity.getEffect(MobEffects.BAD_OMEN);
             if (badOmenInstance == null) return;
             var amplifier = badOmenInstance.getAmplifier();
@@ -160,12 +160,12 @@ public class PhantomFall implements ModInitializer {
             entity.addEffect(new MobEffectInstance(INSOMNIA_OMEN, (amplifier + 1) * 20 * 60 * 20));
         });
 
-        EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, sleepingPos) -> !hasInsomniaOrOmen(player));
+        EntitySleepEvents.ALLOW_SETTING_SPAWN.register((player, _) -> !hasInsomniaOrOmen(player));
         EntitySleepEvents.ALLOW_RESETTING_TIME.register(player -> !hasInsomniaOrOmen(player));
 //        EntitySleepEvents.ALLOW_SLEEP_TIME.register((player,  sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) && player.level().dimensionType().hasFixedTime() ? InteractionResult.SUCCESS : InteractionResult.PASS);
-        EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, sleepingPos, vanillaResult) -> hasInsomniaOrOmen(player) ? EventResult.ALLOW : EventResult.PASS);
+        EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register((player, _, _) -> hasInsomniaOrOmen(player) ? EventResult.ALLOW : EventResult.PASS);
 
-		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
+		EntitySleepEvents.STOP_SLEEPING.register((entity, _) -> {
 			var world = entity.level();
 			if (!(entity instanceof ServerPlayer player)) return;
             var serverWorld = player.level();
